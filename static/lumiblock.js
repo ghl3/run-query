@@ -5,18 +5,24 @@
 
 function run_query_callback(data) {
     console.log("Successfully Got RunQuery data");
-    var lumi_list = data['lumi_duration'];
+    console.log(data);
+    var lumi_list = data['lb_duration'];
     DrawLumiData(lumi_list);
     console.log("Successfully Drew Lumi Data");
 }
+
+console.log("Collecting Data from Run Query...");
 var run_query_string = "";
 $.post('LumiDuration', run_query_string, run_query_callback);
 
 
 function DrawLumiData(data) {
 
-    var w = 20,
-    h = 80;
+
+    var total_width = 2000;
+
+    var w = total_width / data.length;
+    var h = 200;
     
     var x = d3.scale.linear()
         .domain([0, 1])
@@ -36,9 +42,9 @@ function DrawLumiData(data) {
         .data(data)
 	.enter().append("rect")
         .attr("x", function(d, i) { return x(i) - .5; })
-        .attr("y", function(d) { return h - y(d.value) - .5; })
+        .attr("y", function(d) { return h - y(d) - .5; })
         .attr("width", w)
-        .attr("height", function(d) { return y(d.value); });
+        .attr("height", function(d) { return y(d); });
 
     chart.append("line")
         .attr("x1", 0)
@@ -46,6 +52,8 @@ function DrawLumiData(data) {
         .attr("y1", h - .5)
         .attr("y2", h - .5)
         .style("stroke", "#000");
+
+    return;
 
     // Width and height
     var w = 500;
