@@ -3,21 +3,43 @@
 // d3
 //
 
-function run_query_callback(data) {
-    console.log("Successfully Got RunQuery data");
-    console.log(data);
+/// Menu
+/// Results
+/// GetData
 
-    // Fill the charts
-    DrawBarChart(data['lb_lumi'],     "#LumiChart", false);
-    DrawBarChart(data['lb_duration'], "#DurationChart", false);
 
-    console.log("Successfully Drew Lumi Data");
+$(document).ready(function() {
+    console.log("Document Ready");
+
+    $("#Results").hide();
+
+    $('#GetData').live('click', GetRunQueryData);
+
+
+});
+
+function GetRunQueryData() {
+
+    $("#Results").hide();
+
+    function run_query_callback(data) {
+	console.log("Successfully Got RunQuery data");
+	console.log(data);
+
+	// Fill the charts
+	DrawBarChart(data['lb_lumi'],     "#LumiChart", false);
+	DrawBarChart(data['lb_duration'], "#DurationChart", false);
+
+	console.log("Successfully Drew Lumi Data");
+
+	$("#Results").show();
+    }
+
+    console.log("Collecting Data from Run Query...");
+    var run_query_string = "";
+    $.post('LumiDuration', run_query_string, run_query_callback);
+
 }
-
-console.log("Collecting Data from Run Query...");
-var run_query_string = "";
-$.post('LumiDuration', run_query_string, run_query_callback);
-
 
 function DrawBarChart(data, selector_name, log) {
 

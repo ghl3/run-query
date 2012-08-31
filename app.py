@@ -57,26 +57,22 @@ def GetRunLBInfo():
 
     # Find the pickled data string
     result_object = pickle.loads(pickle_string)
-    pprint.pprint(result_object)
 
     print "Starting loop over runs"
     run_list = result_object['Run']
     for run in run_list:
         run_info = result_object[run]
+        print "Getting Event Info"
         event_info = run_info['#Events'][0]
-        #print "First LB %s Last LB: %s Total Events: %s" % (event_info['firstlb'], event_info['lastlb'], event_info['value'])
+        print "Getting Lumi Block duration List"
         lb_list = run_info['#LB'][1]
         lb_duration_list = [lb_list[i+1] - lb_list[i] for i in range(len(lb_list)-1)]
-
-        #stable_list = run_info['lhc:stablebeams'][0]
-        print "Getting sable beam lumi list"
+        print "Getting Integrated Lumi List"
         stable_list = run_info['ofllumi:0:OflLumi-8TeV-002']
-        print "Got Stable beam lumi list"
-        print "Stable List: ", stable_list
         lb_lumi_list = [item['value'] for item in stable_list if item['accepted'] and item['value']!='n.a.']
+        print "Done with this run"
 
     print "Completed loop over runs"
-
 
     result = jsonify(lb_duration=lb_duration_list, 
                      lb_lumi=lb_lumi_list)

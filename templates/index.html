@@ -8,6 +8,7 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
     <script src="http://d3js.org/d3.v2.js"></script>
+    <script type="text/javascript" src="static/lumiblock.js"></script>
 
     <style type="text/css">
       
@@ -30,11 +31,20 @@
   </head>
 
   <body>
-    
-    <div id="LumiChart"></div><br>
-    <div id="DurationChart"></div>
 
-    <script type="text/javascript" src="static/lumiblock.js"></script>
+    <div id="Menu">
+      <h1> Atlas Run Query</h1>
+      <button id="GetData">Get Data</button>
+    </div>
+
+    <div id="Results">
+      <h2>Luminosity per Lumi Block:</h2><br>
+      <div id="LumiChart"></div><br>
+      <h2>Duration of Lumi Block:</h2><br>
+      <div id="DurationChart"></div>
+    </div>
+
+
   </body>
 
 </html>
