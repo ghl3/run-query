@@ -3,11 +3,6 @@
 // d3
 //
 
-/// Menu
-/// Results
-/// GetData
-
-
 $(document).ready(function() {
 
     console.log("Document Ready");
@@ -15,6 +10,7 @@ $(document).ready(function() {
     $('#GetData').live('click', GetRunQueryData);
 
 });
+
 
 function GetRunQueryData() {
 
@@ -24,7 +20,6 @@ function GetRunQueryData() {
     $("#loading").ajaxStart(function () {
 	$(this).show();
     });
-
 
     function run_query_callback(data) {
 	console.log("Successfully Got RunQuery data");
@@ -62,6 +57,7 @@ function GetRunQueryData() {
 
 }
 
+
 function DrawBarChart(data, selector_name, log) {
 
     var bar_width = 20;
@@ -76,20 +72,12 @@ function DrawBarChart(data, selector_name, log) {
 	.domain([0, data.length])
 	.range([xPadding, data.length*bar_width - xPadding*2]);
     
-    //var xScale = d3.scale.linear()
-    //   .domain([0, 1])
-    // .range([0, w]);
-    
-    //var x = d3.scale.ordinal()
-    //.domain(data)
-    //  .rangeBands([0, w]);
-
     var yScale = d3.scale.linear()
         .domain([0, 1.1*max_height])
         .rangeRound([h-yPadDown, yPadUp]);
 
+    // Clear the svg and create a fresh one
     $(selector_name).empty();
-    //d3.select(selector_name).remove();
     var chart = d3.select(selector_name).append("svg")
         .attr("class", "chart")
         .attr("width", bar_width*data.length - 1)
@@ -137,6 +125,7 @@ function DrawBarChart(data, selector_name, log) {
         .attr("y2", h - yPadDown)
         .style("stroke", "#000");
 */
+
     // Create the axis
     var xAxis = d3.svg.axis()
         .scale(xScale)
