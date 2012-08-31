@@ -22,6 +22,10 @@ function GetRunQueryData() {
 
     $("#Results").hide();
 
+    $("#loading").ajaxStart(function () {
+	$(this).show();
+    });
+
     function run_query_callback(data) {
 	console.log("Successfully Got RunQuery data");
 	console.log(data);
@@ -33,6 +37,10 @@ function GetRunQueryData() {
 	console.log("Successfully Drew Lumi Data");
 
 	$("#Results").show();
+	$("#loading").ajaxStop(function () {
+	    $(this).hide();
+	});
+	
     }
 
     console.log("Collecting Data from Run Query...");

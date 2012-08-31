@@ -69,7 +69,12 @@ def GetRunLBInfo():
         lb_duration_list = [lb_list[i+1] - lb_list[i] for i in range(len(lb_list)-1)]
         print "Getting Integrated Lumi List"
         stable_list = run_info['ofllumi:0:OflLumi-8TeV-002']
-        lb_lumi_list = [item['value'] for item in stable_list if item['accepted'] and item['value']!='n.a.']
+        lb_lumi_list = []
+        for item in stable_list:
+            if item['accepted'] and item['value']!='n.a.':
+                lb_lumi_list.append(item['value'])
+            else:
+                lb_lumi_list.append(0.0)
         print "Done with this run"
 
     print "Completed loop over runs"
