@@ -30,28 +30,41 @@
       margin-left: 20px;
       }
 
+      #Menu_Container {
+      width: 800px;
+      }
+
+      #Menu {
+      margin-left: 100px;
+      margin-right: auto;
+      }
+
     </style>
 
   </head>
 
   <body>
 
-    <div id="Menu">
-      <h1> Atlas Run Query</h1>
-      Run Number: <input type="text" id="run_number" />
-      <button id="GetData">
-	Get Data
-      </button>
+    <div id="Menu_Container">
+      <div id="Menu" >
+	<h1> Atlas Run Query</h1>
+	Run Number: <input type="text" id="run_number" />
+	<button id="GetData">
+	  Get Data
+	</button>
+
+	<div id="loading" style="display:none;">
+	  Fetching Data, Please Wait....
+	  <img src="/static/ajax-loader.gif" alt="Loading" />
+	</div>
+
+	<div id="error" style="display:none;">
+	  Error: Failed to retrieve run information
+	</div>
+
+      </div>
     </div>
 
-    <div id="loading" style="display:none;">
-      Fetching Data, Please Wait....
-      <img src="/static/ajax-loader.gif" alt="Loading" />
-    </div>
-
-    <div id="error" style="display:none;">
-      Error: Failed to retrieve run information
-    </div>
 
     <div id="Results">
       <h2>Luminosity per Lumi Block:</h2><br>

@@ -9,6 +9,11 @@ $(document).ready(function() {
     $("#Results").hide();
     $('#GetData').live('click', GetRunQueryData);
 
+    var cached_run_number = localStorage.getItem("run_number");
+    if(cached_run_number != null) {
+	$("#run_number").val(cached_run_number);
+    }
+
 });
 
 
@@ -53,14 +58,15 @@ function GetRunQueryData() {
 
     console.log("Collecting Data from Run Query...");
     var run_number_string = $("#run_number").val();
+    localStorage.setItem("run_number", run_number_string);
     $.post('LumiDuration', {run_number: run_number_string}, run_query_callback);
-
+    
 }
 
 
 function DrawBarChart(data, selector_name, log) {
 
-    var bar_width = 20;
+    var bar_width = 5;
     var h = 200;
     var max_height = Math.max.apply(null, data);
 
