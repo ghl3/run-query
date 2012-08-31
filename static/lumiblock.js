@@ -43,127 +43,97 @@ function GetRunQueryData() {
 
 function DrawBarChart(data, selector_name, log) {
 
-    var w = 20;
+    var bar_width = 20;
     var h = 200;
-
     var max_height = Math.max.apply(null, data);
-    
-    var x = d3.scale.linear()
-        .domain([0, 1])
-        .range([0, w]);
-    
-    var y = d3.scale.linear()
-        .domain([0, max_height])
-        .rangeRound([0, h]);
 
-    /*
-    var y=null;
+    var xPadding = 30;
+    var yPadUp = 0.0;
+    var yPadDown = 30.0;
 
-    if(log) {
-	y = d3.scale.log()
-            .domain([0, 100])
-            .rangeRound([0, h]);
-    } 
-    else {
-	y = d3.scale.linear()
-            .domain([0, 100])
-            .rangeRound([0, h]);
-    }
-*/
+    var xScale = d3.scale.linear()
+	.domain([0, data.length])
+	.range([xPadding, data.length*bar_width - xPadding*2]);
+    
+    //var xScale = d3.scale.linear()
+    //   .domain([0, 1])
+    // .range([0, w]);
+    
+    //var x = d3.scale.ordinal()
+    //.domain(data)
+    //  .rangeBands([0, w]);
+
+    var yScale = d3.scale.linear()
+        .domain([0, 1.1*max_height])
+        .rangeRound([h-yPadDown, yPadUp]);
 
     var chart = d3.select(selector_name).append("svg")
         .attr("class", "chart")
-        .attr("width", w * data.length - 1)
+        .attr("width", bar_width*data.length - 1)
         .attr("height", h);
 
     // Create the bars
     chart.selectAll("rect")
         .data(data)
 	.enter().append("rect")
-        .attr("x", function(d, i) { return x(i) - .5; })
-        .attr("y", function(d) { return h - y(d) - .5; })
-        .attr("width", w)
-        .attr("height", function(d) { return y(d); });
+        .attr("x", function(d, i) { return xScale(i); })
+        //.attr("y", function(d) { return yScale(d) - (h - yPadding); })
+	.attr("y", function(d) { return yScale(d); })
+        .attr("width", bar_width)
+        .attr("height", function(d) { return h - yPadDown - yScale(d) }); // Height is always scaled
 
-    // Create the lablels
+    // Create the labels
+    /*
     chart.selectAll("text")
 	.data(data)
 	.enter()
 	.append("text")
 	.text(function(d) {
+	    if( parseFloat(d) < 0.01 ) return "0.0";
+	    if( parseFloat(d) < 1.0 )  return parseFloat(d).toPrecision(1);
 	    return parseFloat(d).toPrecision(3);
 	})
 	.attr("class", "lumi_label")
 	.attr("x", function(d, i) {
-	    return i*w + 2;
+	    var text_offset = 2;
+	    return xScale(i) + text_offset; //*bar_width + 2;
 	})
 	.attr("y", function(d) {
-	    return h - 5; //0.0; //h - (d * 4);
+	    var text_height = 5;
+	    return h - yPadDown - text_height; //0.0; //h - (d * 4);
 	})
-	.attr("transform", "rotate(90)");
-    
+	.attr("transform", "rotate(-90)");
+    */
+
     // Create the axis lines
+    /*
     chart.append("line")
         .attr("x1", 0)
-        .attr("x2", w * data.length)
-        .attr("y1", h - .5)
-        .attr("y2", h - .5)
+        .attr("x2", bar_width*data.length)
+        .attr("y1", h - yPadDown)
+        .attr("y2", h - yPadDown)
         .style("stroke", "#000");
+*/
+    // Create the axis
+    var xAxis = d3.svg.axis()
+        .scale(xScale)
+        .orient("bottom")
+        .ticks(20);
+
+    var yAxis = d3.svg.axis()
+        .scale(yScale)
+        .orient("left")
+        .ticks(5);
+
+    chart.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(0," + (h - yPadDown ) + ")")
+        .call(xAxis);
+
+    chart.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(" + xPadding + ", 0)")
+        .call(yAxis);
 
     return;
-
-    // Width and height
-    var w = 500;
-    var h = 100;
-
-    var dataset = [
-	[5, 20], 
-	[480, 90], 
-	[250, 50], 
-	[100, 33], 
-	[330, 95],
-	[410, 12], 
-	[475, 44], 
-	[25, 67], 
-	[85, 21], 
-	[220, 88]
-    ];
-
-    //Create SVG element
-    var svg = d3.select("body")
-	.append("svg")
-	.attr("width", w)
-	.attr("height", h);
-
-    svg.selectAll("circle")
-	.data(dataset)
-	.enter()
-	.append("circle")
-	.attr("cx", function(d) {
-	    return d[0];
-	})
-	.attr("cy", function(d) {
-	    return d[1];
-	})
-	.attr("r", function(d) {
-	    return Math.sqrt(h - d[1]);
-	});
-
-    svg.selectAll("text")
-	.data(dataset)
-	.enter()
-	.append("text")
-	.text(function(d) {
-	    return d[0] + "," + d[1];
-	})
-	.attr("x", function(d) {
-	    return d[0];
-	})
-	.attr("y", function(d) {
-	    return d[1];
-	})
-	.attr("font-family", "sans-serif")
-	.attr("font-size", "11px")
-	.attr("fill", "red");
-
 }
