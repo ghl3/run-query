@@ -9,26 +9,39 @@
 
 
 $(document).ready(function() {
+
     console.log("Document Ready");
-
     $("#Results").hide();
-
     $('#GetData').live('click', GetRunQueryData);
-
 
 });
 
 function GetRunQueryData() {
 
     $("#Results").hide();
+    $("#error").hide();
 
     $("#loading").ajaxStart(function () {
 	$(this).show();
     });
 
+
     function run_query_callback(data) {
 	console.log("Successfully Got RunQuery data");
 	console.log(data);
+
+	// Check the flag:
+	if(data['flag'] != 0) {
+	    console.log("Failed to successfully retrieve data");
+	    $("#error").ajaxStop(function () {
+		$(this).show();
+	    });
+	    $("#loading").ajaxStop(function () {
+		$(this).hide();
+	    });
+	    $("#Results").hide();
+	    return;
+	}
 
 	// Fill the charts
 	DrawBarChart(data['lb_lumi'],     "#LumiChart", false);
@@ -44,8 +57,8 @@ function GetRunQueryData() {
     }
 
     console.log("Collecting Data from Run Query...");
-    var run_query_string = "";
-    $.post('LumiDuration', run_query_string, run_query_callback);
+    var run_number_string = $("#run_number").val();
+    $.post('LumiDuration', {run_number: run_number_string}, run_query_callback);
 
 }
 
@@ -75,6 +88,8 @@ function DrawBarChart(data, selector_name, log) {
         .domain([0, 1.1*max_height])
         .rangeRound([h-yPadDown, yPadUp]);
 
+    $(selector_name).empty();
+    //d3.select(selector_name).remove();
     var chart = d3.select(selector_name).append("svg")
         .attr("class", "chart")
         .attr("width", bar_width*data.length - 1)

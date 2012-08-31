@@ -31,18 +31,30 @@ def GetRunLBInfo():
     """ Get a list of the duration of the lumi blocks in the last run
 
     """
-    
-    
+        
     ATLAS_RUN_QUERY_BASE = 'http://atlas-runquery.cern.ch/'
-    QUERY_STRING = 'find+run+last+5+and+ready+%2F+show+events+and+lumi'
+
 
     print "Getting Run Query info from: ", ATLAS_RUN_QUERY_BASE
     
+    # Get the run number
+    run_number = request.form['run_number']
+    # last+5+and+ready
+    QUERY_STRING = 'find+run+' + run_number + '+%2F+show+events+and+lumi'
+
     # Create the request
     url = ATLAS_RUN_QUERY_BASE + 'query.py?q=' + QUERY_STRING
     req = urllib2.Request(url)
     res = urllib2.urlopen(req)
     result = res.read()
+
+    # Ensure that we selected only 1 run
+    reg_expr = '(?<=<tr><td height="10" style="vertical-align: top"><i>No.&nbsp;of&nbsp;runs&nbsp;selected:</i></td><td></td><td valign="top">).*(?=</td></tr>)'
+    m = re.search(reg_expr, result)
+    num_runs = m.group(0)
+    if num_runs != '1':
+        print "Error: run number: %s has %s runs!" % (run_number, num_runs)
+        return jsonify(lb_duration=[], lb_lumi=[], flag=1)
 
     # Extract the pickled data url
     reg_expr = '(?<=a href=".).*(?=" target=_blank title="Query results as serialised python dictionary")'
@@ -80,7 +92,8 @@ def GetRunLBInfo():
     print "Completed loop over runs"
 
     result = jsonify(lb_duration=lb_duration_list, 
-                     lb_lumi=lb_lumi_list)
+                     lb_lumi=lb_lumi_list,
+                     flag=0)
     return result
 
 
