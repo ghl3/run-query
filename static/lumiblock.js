@@ -6,8 +6,11 @@
 function run_query_callback(data) {
     console.log("Successfully Got RunQuery data");
     console.log(data);
-    var lumi_list = data['lb_duration'];
-    DrawLumiData(lumi_list);
+
+    // Fill the charts
+    DrawBarChart(data['lb_lumi'],     "#LumiChart", false);
+    DrawBarChart(data['lb_duration'], "#DurationChart", false);
+
     console.log("Successfully Drew Lumi Data");
 }
 
@@ -16,28 +19,42 @@ var run_query_string = "";
 $.post('LumiDuration', run_query_string, run_query_callback);
 
 
-function DrawLumiData(data) {
+function DrawBarChart(data, selector_name, log) {
 
-
-    var total_width = 2000;
-
-    var w = total_width / data.length;
+    var w = 20;
     var h = 200;
+
+    var max_height = Math.max.apply(null, data);
     
     var x = d3.scale.linear()
         .domain([0, 1])
         .range([0, w]);
     
     var y = d3.scale.linear()
-        .domain([0, 100])
+        .domain([0, max_height])
         .rangeRound([0, h]);
-    
-    var chart = d3.select("body").append("svg")
+
+    /*
+    var y=null;
+
+    if(log) {
+	y = d3.scale.log()
+            .domain([0, 100])
+            .rangeRound([0, h]);
+    } 
+    else {
+	y = d3.scale.linear()
+            .domain([0, 100])
+            .rangeRound([0, h]);
+    }
+*/
+
+    var chart = d3.select(selector_name).append("svg")
         .attr("class", "chart")
         .attr("width", w * data.length - 1)
         .attr("height", h);
 
-
+    // Create the bars
     chart.selectAll("rect")
         .data(data)
 	.enter().append("rect")
@@ -46,6 +63,24 @@ function DrawLumiData(data) {
         .attr("width", w)
         .attr("height", function(d) { return y(d); });
 
+    // Create the lablels
+    chart.selectAll("text")
+	.data(data)
+	.enter()
+	.append("text")
+	.text(function(d) {
+	    return parseFloat(d).toPrecision(3);
+	})
+	.attr("class", "lumi_label")
+	.attr("x", function(d, i) {
+	    return i*w + 2;
+	})
+	.attr("y", function(d) {
+	    return h - 5; //0.0; //h - (d * 4);
+	})
+	.attr("transform", "rotate(90)");
+    
+    // Create the axis lines
     chart.append("line")
         .attr("x1", 0)
         .attr("x2", w * data.length)

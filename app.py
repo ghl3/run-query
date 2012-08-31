@@ -24,8 +24,7 @@ def LumiDuration():
     """ Get a list of lumi block durations for the last run
 
     """
-    lb_duration = GetRunLBInfo()
-    return jsonify(lb_duration=lb_duration)
+    return GetRunLBInfo()
     
 
 def GetRunLBInfo():
@@ -33,9 +32,12 @@ def GetRunLBInfo():
 
     """
     
+    
     ATLAS_RUN_QUERY_BASE = 'http://atlas-runquery.cern.ch/'
-    QUERY_STRING = 'find+run+last+5+and+ready+%2F+show+events'
+    QUERY_STRING = 'find+run+last+5+and+ready+%2F+show+events+and+lumi'
 
+    print "Getting Run Query info from: ", ATLAS_RUN_QUERY_BASE
+    
     # Create the request
     url = ATLAS_RUN_QUERY_BASE + 'query.py?q=' + QUERY_STRING
     req = urllib2.Request(url)
@@ -55,8 +57,9 @@ def GetRunLBInfo():
 
     # Find the pickled data string
     result_object = pickle.loads(pickle_string)
-    #pprint.pprint(result_object)
+    pprint.pprint(result_object)
 
+    print "Starting loop over runs"
     run_list = result_object['Run']
     for run in run_list:
         run_info = result_object[run]
@@ -65,7 +68,21 @@ def GetRunLBInfo():
         lb_list = run_info['#LB'][1]
         lb_duration_list = [lb_list[i+1] - lb_list[i] for i in range(len(lb_list)-1)]
 
-    return lb_duration_list
+        #stable_list = run_info['lhc:stablebeams'][0]
+        print "Getting sable beam lumi list"
+        stable_list = run_info['ofllumi:0:OflLumi-8TeV-002']
+        print "Got Stable beam lumi list"
+        print "Stable List: ", stable_list
+        lb_lumi_list = [item['value'] for item in stable_list if item['accepted'] and item['value']!='n.a.']
+
+    print "Completed loop over runs"
+
+
+    result = jsonify(lb_duration=lb_duration_list, 
+                     lb_lumi=lb_lumi_list)
+    return result
+
+
 
 if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.

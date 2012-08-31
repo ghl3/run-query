@@ -10,15 +10,30 @@
     <script src="http://d3js.org/d3.v2.js"></script>
 
     <style type="text/css">
-      .chart rect {
+      
+      #DurationChart .chart rect {
       fill: steelblue;
       stroke: white;
       }
+      #LumiChart .chart rect {
+      fill: red;
+      stroke: white;
+      }
+
+      text {
+      font-size: 8px;
+      color: #FFFFFF;
+      }
+
     </style>
 
   </head>
 
   <body>
+    
+    <div id="LumiChart"></div><br>
+    <div id="DurationChart"></div>
+
     <script type="text/javascript" src="static/lumiblock.js"></script>
   </body>
 
