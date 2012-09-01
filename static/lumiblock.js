@@ -7,8 +7,12 @@ $(document).ready(function() {
 
     console.log("Document Ready");
     $("#Results").hide();
-    $('#GetData').live('click', GetRunQueryData);
 
+    // Setup the buttons
+    $('#GetRunNumber').live('click', function(){ GetRunQueryData("run_number"); });
+    $('#GetLastRun').live('click',   function(){ GetRunQueryData("last_run"); });
+
+    // Gather any cached info
     var cached_run_number = localStorage.getItem("run_number");
     if(cached_run_number != null) {
 	$("#run_number").val(cached_run_number);
@@ -17,15 +21,16 @@ $(document).ready(function() {
 });
 
 
-function GetRunQueryData() {
+function GetRunQueryData(type) {
 
+    // Create the waiting 'state'
     $("#Results").hide();
     $("#error").hide();
-
     $("#loading").ajaxStart(function () {
 	$(this).show();
     });
 
+    // Declare the success callback
     function run_query_callback(data) {
 	console.log("Successfully Got RunQuery data");
 	console.log(data);
@@ -46,7 +51,6 @@ function GetRunQueryData() {
 	// Fill the charts
 	$("#num_lb").html(data['num_lb']);
 	$("#num_events").html(data['num_events']);
-	
 	DrawBarChart(data['lb_lumi'],     "#LumiChart");
 	DrawBarChart(data['lb_duration'], "#DurationChart");
 	DrawBarChart(data['run_energy'],  "#RunEnergyChart");
@@ -54,18 +58,45 @@ function GetRunQueryData() {
 
 	console.log("Successfully Drew Lumi Data");
 
+	// Restore the 'state'
 	$("#Results").show();
 	$("#loading").ajaxStop(function () {
 	    $(this).hide();
 	});
 	
+    } // End Callback
+
+    // Declare the Error Callback
+    function error_callback() {
+	console.log("Error: Unable to complete ajax request");
+	$("#loading").ajaxStop(function () {
+	    $(this).hide();
+	});
     }
 
     console.log("Collecting Data from Run Query...");
-    var run_number_string = $("#run_number").val();
-    localStorage.setItem("run_number", run_number_string);
-    $.post('LumiDuration', {run_number: run_number_string}, run_query_callback);
-    
+
+    if(type==""){
+	console.log("Error: Must Enter a valid Query type");
+	error_callback();
+    }
+    else if(type=="run_number"){
+	var run_number_string = $("#run_number").val();
+	console.log("Getting RunQuery info based on run number: " + run_number_string);
+	localStorage.setItem("run_number", run_number_string);
+	$.post('LumiDuration', {type: "run_number", run_number: run_number_string}, run_query_callback)
+	    .error(error_callback);
+    }
+    else if(type=="last_run") {
+	console.log("Getting RunQuery info based on last run");
+	$.post('LumiDuration', {type: "last_run"}, run_query_callback)
+	    .error(error_callback);
+    }
+    else {
+	console.log("Unknown Query type entered:" + type);
+	error_callback();
+    }
+
 }
 
 
