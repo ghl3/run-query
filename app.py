@@ -36,17 +36,27 @@ def GetRunLBInfo():
 
 
     print "Getting Run Query info from: ", ATLAS_RUN_QUERY_BASE
+
+    #type = request.form['type']
+    #if type=='last_run':
+    #    QUERY_STRING = 'find+run+last+1+and+events+100000+and+ready+%2F+show+run+and+lumi'
     
     # Get the run number
     run_number = request.form['run_number']
     # last+5+and+ready
-    QUERY_STRING = 'find+run+' + run_number + '+%2F+show+events+and+lumi'
+    #QUERY_STRING = 'find+run+' + run_number + '+%2F+show+events+and+lumi'
+    QUERY_STRING = 'find+run+' + run_number + '+%2F+show+all+and+lumi'
+    
 
     # Create the request
-    url = ATLAS_RUN_QUERY_BASE + 'query.py?q=' + QUERY_STRING
-    req = urllib2.Request(url)
-    res = urllib2.urlopen(req)
-    result = res.read()
+    try:
+        url = ATLAS_RUN_QUERY_BASE + 'query.py?q=' + QUERY_STRING
+        req = urllib2.Request(url)
+        res = urllib2.urlopen(req, timeout=60)
+        result = res.read()
+    except urllib2.URLError:
+        print "Error: Unable to fetch info from url %s" % url
+        return jsonify(flag=1)
 
     # Ensure that we selected only 1 run
     reg_expr = '(?<=<tr><td height="10" style="vertical-align: top"><i>No.&nbsp;of&nbsp;runs&nbsp;selected:</i></td><td></td><td valign="top">).*(?=</td></tr>)'
@@ -70,32 +80,53 @@ def GetRunLBInfo():
     # Find the pickled data string
     result_object = pickle.loads(pickle_string)
 
-    print "Starting loop over runs"
+    # Loop over runs
     run_list = result_object['Run']
+    if len(run_list) != 1:
+        print "Error: More than 1 run selected"
+        return jsonify(flag=1)
+    
+    print "Starting Loop Over Runs"
     for run in run_list:
-        run_info = result_object[run]
+        run_info = result_object[run]        
+        pprint.pprint(run_info)
+
         print "Getting Event Info"
         event_info = run_info['#Events'][0]
+
         print "Getting Lumi Block duration List"
         lb_list = run_info['#LB'][1]
         lb_duration_list = [lb_list[i+1] - lb_list[i] for i in range(len(lb_list)-1)]
+
         print "Getting Integrated Lumi List"
-        stable_list = run_info['ofllumi:0:OflLumi-8TeV-002']
-        lb_lumi_list = []
-        for item in stable_list:
-            if item['accepted'] and item['value']!='n.a.':
-                lb_lumi_list.append(item['value'])
-            else:
-                lb_lumi_list.append(0.0)
+        lb_lumi_list = [item['value'] for item in run_info['ofllumi:0:OflLumi-8TeV-002']]
+        for item in lb_lumi_list:
+            if item=='n.a.': item=0.0
+
+        print "Getting beam energy"
+        run_energy_list = [item['value'] for item in run_info['lhc:beamenergy']]
+ 
+        print "Getting colliding bunches"
+        bunches_list = [item['value'] for item in run_info['olc:collbunches']]
+                
         print "Done with this run"
 
     print "Completed loop over runs"
 
     result = jsonify(lb_duration=lb_duration_list, 
                      lb_lumi=lb_lumi_list,
+                     run_energy=run_energy_list,
+                     bunches=bunches_list,
                      flag=0)
     return result
 
+
+#def GetRunAttribute(att_name):
+#    """ Get a list of attributes from the run object
+#
+#    """
+
+    
 
 
 if __name__ == '__main__':

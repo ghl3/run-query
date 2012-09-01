@@ -44,8 +44,10 @@ function GetRunQueryData() {
 	}
 
 	// Fill the charts
-	DrawBarChart(data['lb_lumi'],     "#LumiChart", false);
-	DrawBarChart(data['lb_duration'], "#DurationChart", false);
+	DrawBarChart(data['lb_lumi'],     "#LumiChart");
+	DrawBarChart(data['lb_duration'], "#DurationChart");
+	DrawBarChart(data['run_energy'],  "#RunEnergyChart");
+	DrawBarChart(data['bunches'],     "#BunchesChart");
 
 	console.log("Successfully Drew Lumi Data");
 
@@ -64,7 +66,7 @@ function GetRunQueryData() {
 }
 
 
-function DrawBarChart(data, selector_name, log) {
+function DrawBarChart(data, selector_name) {
 
     var bar_width = 5;
     var h = 200;
