@@ -44,6 +44,9 @@ function GetRunQueryData() {
 	}
 
 	// Fill the charts
+	$("#num_lb").html(data['num_lb']);
+	$("#num_events").html(data['num_events']);
+	
 	DrawBarChart(data['lb_lumi'],     "#LumiChart");
 	DrawBarChart(data['lb_duration'], "#DurationChart");
 	DrawBarChart(data['run_energy'],  "#RunEnergyChart");

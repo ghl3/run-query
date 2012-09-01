@@ -157,7 +157,8 @@ def GetRunLBInfo():
 
     print "Completed loop over runs"
 
-    result = jsonify(lb_duration=lb_duration_list, 
+    result = jsonify(num_lb=num_lb, num_events=num_events,
+                     lb_duration=lb_duration_list, 
                      lb_lumi=lb_lumi_list,
                      run_energy=run_energy_list,
                      bunches=bunches_list,
