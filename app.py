@@ -43,9 +43,10 @@ def GetRunLBInfo():
         print "Invalid request supplied.  Must have a 'type'"
         return jsonify(flag=1)
 
+    # Figure out what type of request we're using
     if type=='last_run':
         print "Using last_run"
-        QUERY_STRING = 'find+run+last+1+and+events+100000+and+ready'
+        QUERY_STRING = 'find+run+last+1+and+ready'
     elif type=="run_number":
         print "Using run_number:",
         run_number = request.form['run_number']
@@ -60,7 +61,7 @@ def GetRunLBInfo():
         url = ATLAS_RUN_QUERY_BASE + 'query.py?q=' + QUERY_STRING + ATLAS_RUN_QUERY_INFO
         print "Fetching info from: %s" % url
         req = urllib2.Request(url)
-        res = urllib2.urlopen(req, timeout=60)
+        res = urllib2.urlopen(req, timeout=90)
         result = res.read()
     except urllib2.URLError:
         print "Error: Unable to fetch info from url %s" % url
@@ -70,22 +71,25 @@ def GetRunLBInfo():
     reg_expr = '(?<=<tr><td height="10" style="vertical-align: top"><i>No.&nbsp;of&nbsp;runs&nbsp;selected:</i></td><td></td><td valign="top">).*(?=</td></tr>)'
     m = re.search(reg_expr, result)
     num_runs = m.group(0)
+    if num_runs == '0':
+        print "Error: found no runs with query"
+        return jsonify(flag=2)
     if num_runs != '1':
-        print "Error: run number: %s has %s runs!" % (run_number, num_runs)
+        print "Error: unexpected number of runs found"
         return jsonify(flag=1)
 
     # Extract the pickled data url
+    print "Getting (pickled) url"
     reg_expr = '(?<=a href=".).*(?=" target=_blank title="Query results as serialised python dictionary")'
     m = re.search(reg_expr, result)
     pickle_url = m.group(0)
 
     # Get the pickle string
+    print "Downloading and loading the pickled data"
     url = ATLAS_RUN_QUERY_BASE + pickle_url
     req = urllib2.Request(url)
     res = urllib2.urlopen(req)
     pickle_string = res.read()
-
-    # Find the pickled data string
     result_object = pickle.loads(pickle_string)
 
     # Loop over runs
@@ -97,9 +101,6 @@ def GetRunLBInfo():
     print "Starting Loop Over Runs"
     for run in run_list:
         run_info = result_object[run]        
-        #pprint.pprint(run_info)
-        #for key in run_info:
-        #    print "Key: ", key
 
         print "Getting Event Info"
         num_events = run_info['#Events'][0]['value']
@@ -111,11 +112,6 @@ def GetRunLBInfo():
         num_lb = run_info['#LB'][0]
         lb_list = run_info['#LB'][1]
         lb_duration_list = [lb_list[i+1] - lb_list[i] for i in range(len(lb_list)-1)]
-
-        #print "Getting Integrated Lumi List"
-        #lb_lumi_list = [item['value'] for item in run_info['ofllumi:0:OflLumi-8TeV-002']]
-        #for item in lb_lumi_list:
-        #    if item=='n.a.': item=0.0
 
         print "Getting Integrated Lumi List"
         stable_list = run_info['ofllumi:0:OflLumi-8TeV-002']
@@ -160,8 +156,6 @@ def GetRunLBInfo():
         for lb in range(1, num_lb+1):
             bunches_list.append(bunches_map[lb])
 
-        #bunches_list = [item['value'] for item in run_info['olc:collbunches']]
-                
         print "Done with this run"
 
     print "Completed loop over runs"
@@ -173,15 +167,6 @@ def GetRunLBInfo():
                      bunches=bunches_list,
                      flag=0)
     return result
-
-
-#def GetRunAttribute(att_name):
-#    """ Get a list of attributes from the run object
-#
-#    """
-
-    
-
 
 if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.

@@ -30,21 +30,32 @@ function GetRunQueryData(type) {
 	$(this).show();
     });
 
+    // Declare the Error Callback
+    function error_callback() {
+	console.log("Error: Unable to complete ajax request");
+	$("#error").ajaxStop(function () {
+	    $(this).show();
+	});
+	$("#loading").ajaxStop(function () {
+	    $(this).hide();
+	});
+	$("#Results").hide();
+    }
+
     // Declare the success callback
     function run_query_callback(data) {
 	console.log("Successfully Got RunQuery data");
 	console.log(data);
 
 	// Check the flag:
+	if(data['flag'] == 2) {
+	    console.log("No runs of the specified type found");
+	    error_callback();
+	    return;
+	}
 	if(data['flag'] != 0) {
 	    console.log("Failed to successfully retrieve data");
-	    $("#error").ajaxStop(function () {
-		$(this).show();
-	    });
-	    $("#loading").ajaxStop(function () {
-		$(this).hide();
-	    });
-	    $("#Results").hide();
+	    error_callback();
 	    return;
 	}
 
@@ -66,19 +77,12 @@ function GetRunQueryData(type) {
 	
     } // End Callback
 
-    // Declare the Error Callback
-    function error_callback() {
-	console.log("Error: Unable to complete ajax request");
-	$("#loading").ajaxStop(function () {
-	    $(this).hide();
-	});
-    }
-
     console.log("Collecting Data from Run Query...");
 
     if(type==""){
 	console.log("Error: Must Enter a valid Query type");
 	error_callback();
+	return;
     }
     else if(type=="run_number"){
 	var run_number_string = $("#run_number").val();
@@ -95,6 +99,7 @@ function GetRunQueryData(type) {
     else {
 	console.log("Unknown Query type entered:" + type);
 	error_callback();
+	return;
     }
 
 }
