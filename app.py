@@ -34,7 +34,6 @@ def GetRunLBInfo():
         
     ATLAS_RUN_QUERY_BASE = 'http://atlas-runquery.cern.ch/'
 
-
     print "Getting Run Query info from: ", ATLAS_RUN_QUERY_BASE
 
     #type = request.form['type']
@@ -44,13 +43,13 @@ def GetRunLBInfo():
     # Get the run number
     run_number = request.form['run_number']
     # last+5+and+ready
-    #QUERY_STRING = 'find+run+' + run_number + '+%2F+show+events+and+lumi'
-    QUERY_STRING = 'find+run+' + run_number + '+%2F+show+all+and+lumi'
-    
+    QUERY_STRING = 'find+run+' + run_number + '+%2F+show+events+and+lumi+and+lhc'
+    #QUERY_STRING = 'find+run+' + run_number + '+%2F+show+all+and+lumi'
 
     # Create the request
     try:
         url = ATLAS_RUN_QUERY_BASE + 'query.py?q=' + QUERY_STRING
+        print "Fetching info from: %s" % url
         req = urllib2.Request(url)
         res = urllib2.urlopen(req, timeout=60)
         result = res.read()
@@ -89,25 +88,70 @@ def GetRunLBInfo():
     print "Starting Loop Over Runs"
     for run in run_list:
         run_info = result_object[run]        
-        pprint.pprint(run_info)
+        #pprint.pprint(run_info)
+        #for key in run_info:
+        #    print "Key: ", key
 
         print "Getting Event Info"
-        event_info = run_info['#Events'][0]
+        num_events = run_info['#Events'][0]['value']
+
+        print "Getting start and end time"
+        (start_time, end_time) = run_info['Start and endtime'].strip().split(',')
 
         print "Getting Lumi Block duration List"
+        num_lb = run_info['#LB'][0]
         lb_list = run_info['#LB'][1]
         lb_duration_list = [lb_list[i+1] - lb_list[i] for i in range(len(lb_list)-1)]
 
-        print "Getting Integrated Lumi List"
-        lb_lumi_list = [item['value'] for item in run_info['ofllumi:0:OflLumi-8TeV-002']]
-        for item in lb_lumi_list:
-            if item=='n.a.': item=0.0
+        #print "Getting Integrated Lumi List"
+        #lb_lumi_list = [item['value'] for item in run_info['ofllumi:0:OflLumi-8TeV-002']]
+        #for item in lb_lumi_list:
+        #    if item=='n.a.': item=0.0
 
+        print "Getting Integrated Lumi List"
+        stable_list = run_info['ofllumi:0:OflLumi-8TeV-002']
+        lb_lumi_list = []
+        for item in stable_list:
+            if item['accepted'] and item['value']!='n.a.':
+                lb_lumi_list.append(item['value'])
+            else:
+                lb_lumi_list.append(0.0)
+            pass
+
+        # The beam energy is a bit complicated
+        # Each item gives an energy and a range
+        # of lumi blocks.
+        # We want to convert this into an ordered
+        # list of lb energy values
         print "Getting beam energy"
-        run_energy_list = [item['value'] for item in run_info['lhc:beamenergy']]
- 
+        run_energy_map = {}
+        for item in run_info['lhc:beamenergy']:
+            first_lb = item['firstlb']
+            last_lb = item['lastlb']
+            energy = item['value']
+            for lb_number in range(first_lb, last_lb+1):
+                run_energy_map[lb_number] = energy
+            pass
+        run_energy_list=[]
+        for lb in range(1, num_lb+1):
+            run_energy_list.append(run_energy_map[lb])
+
+
+        # Same deal for the colliding bunches
         print "Getting colliding bunches"
-        bunches_list = [item['value'] for item in run_info['olc:collbunches']]
+        bunches_map = {}
+        for item in run_info['olc:collbunches']:
+            first_lb = item['firstlb']
+            last_lb = item['lastlb']
+            bunches = item['value']
+            for lb_number in range(first_lb, last_lb+1):
+                bunches_map[lb_number] = bunches
+            pass
+        bunches_list=[]
+        for lb in range(1, num_lb+1):
+            bunches_list.append(bunches_map[lb])
+
+        #bunches_list = [item['value'] for item in run_info['olc:collbunches']]
                 
         print "Done with this run"
 
