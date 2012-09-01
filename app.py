@@ -33,22 +33,31 @@ def GetRunLBInfo():
     """
         
     ATLAS_RUN_QUERY_BASE = 'http://atlas-runquery.cern.ch/'
+    ATLAS_RUN_QUERY_INFO = '+%2F+show+events+and+lumi+and+lhc'
 
     print "Getting Run Query info from: ", ATLAS_RUN_QUERY_BASE
 
-    #type = request.form['type']
-    #if type=='last_run':
-    #    QUERY_STRING = 'find+run+last+1+and+events+100000+and+ready+%2F+show+run+and+lumi'
-    
-    # Get the run number
-    run_number = request.form['run_number']
-    # last+5+and+ready
-    QUERY_STRING = 'find+run+' + run_number + '+%2F+show+events+and+lumi+and+lhc'
-    #QUERY_STRING = 'find+run+' + run_number + '+%2F+show+all+and+lumi'
+    try:
+        type = request.form['type']
+    except KeyError:
+        print "Invalid request supplied.  Must have a 'type'"
+        return jsonify(flag=1)
+
+    if type=='last_run':
+        print "Using last_run"
+        QUERY_STRING = 'find+run+last+1+and+events+100000+and+ready'
+    elif type=="run_number":
+        print "Using run_number:",
+        run_number = request.form['run_number']
+        print run_number
+        QUERY_STRING = 'find+run+' + run_number
+    else:
+        print "Invalid querty type found"
+        return jsonify(flag=1)
 
     # Create the request
     try:
-        url = ATLAS_RUN_QUERY_BASE + 'query.py?q=' + QUERY_STRING
+        url = ATLAS_RUN_QUERY_BASE + 'query.py?q=' + QUERY_STRING + ATLAS_RUN_QUERY_INFO
         print "Fetching info from: %s" % url
         req = urllib2.Request(url)
         res = urllib2.urlopen(req, timeout=60)
@@ -63,7 +72,7 @@ def GetRunLBInfo():
     num_runs = m.group(0)
     if num_runs != '1':
         print "Error: run number: %s has %s runs!" % (run_number, num_runs)
-        return jsonify(lb_duration=[], lb_lumi=[], flag=1)
+        return jsonify(flag=1)
 
     # Extract the pickled data url
     reg_expr = '(?<=a href=".).*(?=" target=_blank title="Query results as serialised python dictionary")'
