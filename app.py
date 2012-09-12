@@ -19,6 +19,7 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
+
 @app.route('/LumiDuration', methods=['GET', 'POST'])
 def LumiDuration():
     """ Get a list of lumi block durations for the last run
