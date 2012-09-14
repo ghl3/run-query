@@ -6,6 +6,7 @@ import json
 import urllib2
 import pickle
 import pprint
+import time
 
 from flask import Flask
 from flask import url_for
@@ -27,6 +28,15 @@ def LumiDuration():
     """
     return GetRunLBInfo()
     
+
+def PrintTime(epoch):
+    """ Convert from epoch time to string
+
+    """
+    epoch = float(epoch)
+    gm_time = time.gmtime(epoch)
+    return time.strftime("%a, %d %b %Y %H:%M:%S +0000", gm_time)
+
 
 def GetRunLBInfo():
     """ Get a list of the duration of the lumi blocks in the last run
@@ -93,6 +103,7 @@ def GetRunLBInfo():
     res = urllib2.urlopen(req)
     pickle_string = res.read()
     result_object = pickle.loads(pickle_string)
+    #pprint.pprint(result_object)
 
     # Loop over runs
     run_list = result_object['Run']
@@ -108,7 +119,9 @@ def GetRunLBInfo():
         num_events = run_info['#Events'][0]['value']
 
         print "Getting start and end time"
-        (start_time, end_time) = run_info['Start and endtime'].strip().split(',')
+        (start_time, end_time) = map(PrintTime, run_info['Start and endtime'].strip().split(','))
+        print start_time
+        print end_time
 
         print "Getting Lumi Block duration List"
         num_lb = run_info['#LB'][0]
@@ -163,10 +176,13 @@ def GetRunLBInfo():
     print "Completed loop over runs"
 
     result = jsonify(num_lb=num_lb, num_events=num_events,
+                     start_time=start_time,
+                     end_time=end_time,
                      lb_duration=lb_duration_list, 
                      lb_lumi=lb_lumi_list,
                      run_energy=run_energy_list,
                      bunches=bunches_list,
+                     pickle_url=pickle_url,
                      flag=0)
     return result
 

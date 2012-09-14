@@ -42,6 +42,25 @@ function GetRunQueryData(type) {
 	$("#Results").hide();
     }
 
+    // Create the query that we're going to do
+    var query = null;
+
+    if(type==""){
+	console.log("Error: Must Enter a valid Query type");
+	error_callback();
+	return;
+    }
+    else if(type=="run_number"){
+	var run_number_string = $("#run_number").val();
+	console.log("Getting RunQuery info based on run number: " + run_number_string);
+	localStorage.setItem("run_number", run_number_string);
+	query = {type: "run_number", run_number: run_number_string};
+    }
+    else if(type=="last_run") {
+	console.log("Getting RunQuery info based on last run");
+	query = {type: "last_run"};
+    }
+
     // Declare the success callback
     function run_query_callback(data) {
 	console.log("Successfully Got RunQuery data");
@@ -59,9 +78,29 @@ function GetRunQueryData(type) {
 	    return;
 	}
 
-	// Fill the charts
+	// Cache this query if it's a particular run number
+	if( query["type"] == "run_number") {
+
+	    // First, check if we have a query cache
+	    query_cache = new Array();
+	    if( localStorage.getItem("query_cache")==null) {
+		query_cache = localStorage(localStorage.getItem("query_cache"));
+	    }
+
+	    // Store this query as a key, and the 
+	    // url for the pickeled result as a val
+	    query_cache[query] = data['pickle_url']; 
+	    
+	    // And finally, save back to storage
+	    localStorage.setItem("query_cache", query_cache);
+	}
+
+	// Fill the Run Info
 	$("#num_lb").html(data['num_lb']);
 	$("#num_events").html(data['num_events']);
+	$("#start_time").html(data['start_time']);
+	$("#end_time").html(data['end_time']);
+	// Fill the charts
 	DrawBarChart(data['lb_lumi'],     "#LumiChart");
 	DrawBarChart(data['lb_duration'], "#DurationChart");
 	DrawBarChart(data['run_energy'],  "#RunEnergyChart");
