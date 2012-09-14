@@ -47,7 +47,8 @@ def GetRunLBInfo():
     # Figure out what type of request we're using
     if type=='last_run':
         print "Using last_run"
-        QUERY_STRING = 'find+run+last+1+and+ready'
+        #QUERY_STRING = 'find+run+last+1+and+ready'
+        QUERY_STRING = 'find+run+last+1'
     elif type=="run_number":
         print "Using run_number:",
         run_number = request.form['run_number']
