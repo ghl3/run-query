@@ -83,16 +83,24 @@ function GetRunQueryData(type) {
 
 	    // First, check if we have a query cache
 	    query_cache = new Array();
-	    if( localStorage.getItem("query_cache")==null) {
-		query_cache = localStorage(localStorage.getItem("query_cache"));
+	    if( localStorage.getItem("query_cache")!=null) {
+		query_cache = JSON.parse(localStorage.getItem("query_cache"));
 	    }
 
 	    // Store this query as a key, and the 
 	    // url for the pickeled result as a val
+	    console.log("Setting query:");
+	    console.log(query);
 	    query_cache[query] = data['pickle_url']; 
-	    
+
+	    console.log("Pickle URL:");
+	    console.log(query_cache[query]);
+
+	    console.log("Query Cache:");
+	    console.log(query_cache);
+
 	    // And finally, save back to storage
-	    localStorage.setItem("query_cache", query_cache);
+	    localStorage.setItem('query_cache', JSON.stringify(query_cache));
 	}
 
 	// Fill the Run Info
