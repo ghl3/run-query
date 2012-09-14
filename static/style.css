@@ -1,0 +1,36 @@
+
+
+#DurationChart .chart rect {
+  fill: steelblue;
+  stroke: white;
+}
+#LumiChart .chart rect {
+  fill: green;
+  stroke: white;
+}
+#RunEnergyChart .chart rect {
+  fill: red;
+  stroke: white;
+}
+#BunchesChart .chart rect {
+  fill: purple;
+  stroke: white;
+}
+
+text {
+  font-size: 8px;
+  color: #FFFFFF;
+}
+
+#Plots {
+  margin-left: 20px;
+}
+
+#Menu_Container {
+  width: 800px;
+}
+
+#Menu, #RunInfo {
+  margin-left: 100px;
+  margin-right: auto;
+}

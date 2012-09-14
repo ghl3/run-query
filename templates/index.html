@@ -11,45 +11,8 @@
     <script src="{{url_for('static', filename='d3.v2.min.js')}}"></script>
     <script type="text/javascript" src="/static/lumiblock.js"></script>
 
-    <style type="text/css">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}" />
       
-      #DurationChart .chart rect {
-      fill: steelblue;
-      stroke: white;
-      }
-      #LumiChart .chart rect {
-      fill: green;
-      stroke: white;
-      }
-      #RunEnergyChart .chart rect {
-      fill: red;
-      stroke: white;
-      }
-      #BunchesChart .chart rect {
-      fill: purple;
-      stroke: white;
-      }
-
-      text {
-      font-size: 8px;
-      color: #FFFFFF;
-      }
-
-      #Results {
-      margin-left: 20px;
-      }
-
-      #Menu_Container {
-      width: 800px;
-      }
-
-      #Menu {
-      margin-left: 100px;
-      margin-right: auto;
-      }
-
-    </style>
-
   </head>
 
   <body>
@@ -81,17 +44,19 @@
 	Number of Events: <div id="num_events"></div>
       </div>
 
-      <h2>Luminosity per Lumi Block:</h2><br>
-      <div id="LumiChart"></div><br>
+      <div id="Plots">
+	<h2>Luminosity per Lumi Block:</h2><br>
+	<div id="LumiChart"></div><br>
 
-      <h2>Duration of Lumi Block:</h2><br>
-      <div id="DurationChart"></div>
+	<h2>Duration of Lumi Block:</h2><br>
+	<div id="DurationChart"></div>
 
-      <h2>Beam Energy:</h2><br>
-      <div id="RunEnergyChart"></div>
+	<h2>Beam Energy:</h2><br>
+	<div id="RunEnergyChart"></div>
 
-      <h2>Bunches:</h2><br>
-      <div id="BunchesChart"></div>
+	<h2>Bunches:</h2><br>
+	<div id="BunchesChart"></div>
+      </div>
 
     </div>
 
