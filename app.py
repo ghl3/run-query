@@ -120,8 +120,9 @@ def GetRunLBInfo():
 
         print "Getting start and end time"
         (start_time, end_time) = map(PrintTime, run_info['Start and endtime'].strip().split(','))
-        print start_time
-        print end_time
+
+        print "Getting Run Number"
+        run_number = run_info['Run']
 
         print "Getting Lumi Block duration List"
         num_lb = run_info['#LB'][0]
@@ -175,7 +176,8 @@ def GetRunLBInfo():
 
     print "Completed loop over runs"
 
-    result = jsonify(num_lb=num_lb, num_events=num_events,
+    result = jsonify(run_number=run_number,
+                     num_lb=num_lb, num_events=num_events,
                      start_time=start_time,
                      end_time=end_time,
                      lb_duration=lb_duration_list, 

@@ -121,10 +121,12 @@ function GetRunQueryData(type) {
 	}
 
 	// Fill the Run Info
+	$("#result_run_number").html(data['run_number']);
 	$("#num_lb").html(data['num_lb']);
 	$("#num_events").html(data['num_events']);
 	$("#start_time").html(data['start_time']);
 	$("#end_time").html(data['end_time']);
+
 	// Fill the charts
 	DrawBarChart(data['lb_lumi'],     "#LumiChart");
 	DrawBarChart(data['lb_duration'], "#DurationChart");
