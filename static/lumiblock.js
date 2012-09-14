@@ -54,11 +54,31 @@ function GetRunQueryData(type) {
 	var run_number_string = $("#run_number").val();
 	console.log("Getting RunQuery info based on run number: " + run_number_string);
 	localStorage.setItem("run_number", run_number_string);
-	query = {type: "run_number", run_number: run_number_string};
+	query = {"type": "run_number", "run_number": run_number_string};
     }
     else if(type=="last_run") {
 	console.log("Getting RunQuery info based on last run");
-	query = {type: "last_run"};
+	query = {"type": "last_run"};
+    }
+
+
+    // Determine if we have this query cached
+    query_cache = null;
+    query_string = JSON.stringify(query);
+    if( query["type"] == "run_number") {
+	
+	if( localStorage.getItem("query_cache")!=null) {
+	    query_cache = JSON.parse(localStorage.getItem("query_cache"));
+	    console.log("Got Cached query:");
+	    console.log(query_cache);
+	    
+	    // Check if the current query is in the cache
+	    console.log("Checking for cached result");
+	    console.log( query_cache[query_string] );
+	}
+	else {
+	    query_cache = {};
+	}
     }
 
     // Declare the success callback
@@ -81,26 +101,23 @@ function GetRunQueryData(type) {
 	// Cache this query if it's a particular run number
 	if( query["type"] == "run_number") {
 
-	    // First, check if we have a query cache
-	    query_cache = new Array();
-	    if( localStorage.getItem("query_cache")!=null) {
-		query_cache = JSON.parse(localStorage.getItem("query_cache"));
-	    }
-
 	    // Store this query as a key, and the 
 	    // url for the pickeled result as a val
 	    console.log("Setting query:");
 	    console.log(query);
-	    query_cache[query] = data['pickle_url']; 
+	    console.log(query_string);
 
+		    // Add the url
+	    query_cache[query_string] = data['pickle_url']; 
 	    console.log("Pickle URL:");
-	    console.log(query_cache[query]);
+	    console.log(query_cache[query_string]);
 
 	    console.log("Query Cache:");
 	    console.log(query_cache);
 
 	    // And finally, save back to storage
 	    localStorage.setItem('query_cache', JSON.stringify(query_cache));
+	    //localStorage.setItem('query_cache', query_cache);
 	}
 
 	// Fill the Run Info
